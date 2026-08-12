@@ -1,38 +1,40 @@
 # dataforseo-mcp-skill
 
-Un **skill Claude** (Claude Code / Claude Desktop) qui sert de **playbook cost-aware** pour l'API [DataForSEO](https://dataforseo.com/), pensé pour travailler **en symbiose avec le [serveur MCP officiel DataForSEO](https://github.com/dataforseo/mcp-server-typescript)**.
+**Languages:** English · [Français](README.fr.md)
 
-> Le MCP donne les **mains** (accès outillé à toute l'API). Ce skill donne le **cerveau** : *quel* endpoint pour *quel* besoin, *quel* mode d'exécution, et surtout comment **ne pas cramer de budget** (DataForSEO est une API prépayée, facturée à chaque appel).
+A **Claude skill** (Claude Code / Claude Desktop) that acts as a **cost-aware playbook** for the [DataForSEO](https://dataforseo.com/) API, designed to work **in symbiosis with the [official DataForSEO MCP server](https://github.com/dataforseo/mcp-server-typescript)**.
 
-## Le problème que ça résout
+> The MCP gives Claude the **hands** (tooling access to the whole API). This skill gives it the **brain**: *which* endpoint for *which* need, *which* execution mode, and above all how to **not burn budget** (DataForSEO is a prepaid API, billed per request).
 
-Le MCP officiel expose 4 outils très malins (`docs_index`, `docs_list_sections`, `docs_search`, `api_request`) qui couvrent **toute** l'API v3. C'est puissant… mais Claude se retrouve devant des centaines d'endpoints, plusieurs modes d'exécution aux prix très différents, et **aucun garde-fou de coût**. Résultat : soit il sous-utilise l'API, soit il lance des batchs coûteux sans prévenir.
+## The problem it solves
 
-Ce skill est la couche de connaissance qui manque :
+The official MCP exposes 4 clever tools (`docs_index`, `docs_list_sections`, `docs_search`, `api_request`) that cover the **entire** v3 API. Powerful — but Claude then faces hundreds of endpoints, several execution modes at very different prices, and **no cost guardrails**. The result: either it under-uses the API, or it fires off expensive batches without warning.
+
+This skill is the missing knowledge layer:
 
 ```
-┌─────────────────────────────┐     ┌──────────────────────────────┐
-│  MCP DataForSEO (les mains)  │     │  Ce skill (le cerveau)        │
-│  • docs_*  → naviguer la doc │  +  │  • quel endpoint pour quel job │
-│  • api_request → tout appeler│     │  • Live vs Standard vs Labs    │
-│                              │     │  • garde-fous COÛT + sandbox   │
-└─────────────────────────────┘     │  • recettes prêtes à l'emploi  │
-                                     └──────────────────────────────┘
+┌──────────────────────────────┐     ┌───────────────────────────────┐
+│  DataForSEO MCP (the hands)  │     │  This skill (the brain)        │
+│  • docs_*  → browse the docs │  +  │  • which endpoint for which job │
+│  • api_request → call anything│     │  • Live vs Standard vs Labs     │
+│                              │     │  • COST guardrails + sandbox    │
+└──────────────────────────────┘     │  • ready-to-use recipes         │
+                                      └───────────────────────────────┘
 ```
 
-## Avantages
+## Advantages
 
-- **💸 Cost-aware avant tout.** DataForSEO est prépayé et facturé à l'appel. Le skill impose de vérifier le solde (`appendix/user_data`, gratuit), de **prévenir + estimer avant tout batch important**, de **tester la structure en Sandbox (gratuit)** avant la prod, et d'**annoncer le `cost`** après chaque appel réel.
-- **🧭 Le bon endpoint, le bon mode.** Une carte de décision : SERP, Keywords Data, Labs, Backlinks, On-Page, Content/Domain Analytics, Merchant/App/Business — et surtout **quand préférer DataForSEO Labs** (base interne, ~10× moins cher) au scraping SERP live pour la recherche de mots-clés / concurrents.
-- **⚙️ Live vs Standard queue vs Labs.** Le skill explique l'arbitrage latence/coût (`.../live` cher et immédiat, `task_post`+`task_get` ~2× moins cher en asynchrone, Labs bon marché sans scraping).
-- **📋 Recettes prêtes.** Search volume, suivi de positions SERP, idées de mots-clés, concurrents/intersection de domaines, backlinks bulk, audit on-page — en appels MCP **ou** en `curl` (réutilisable dans n8n, Make, etc.).
-- **🔌 Zéro couplage rigide.** Contrairement à un skill « wrappers Python figés », il ne code en dur aucun sous-ensemble d'endpoints : il s'appuie sur `api_request` du MCP, donc **toute l'API reste accessible**.
+- **💸 Cost-aware first.** DataForSEO is prepaid and billed per call. The skill enforces checking the balance (`appendix/user_data`, free), **warning + estimating before any large batch**, **testing request structure in the free Sandbox** before production, and **reporting the `cost`** after every real call.
+- **🧭 The right endpoint, the right mode.** A decision map across SERP, Keywords Data, Labs, Backlinks, On-Page, Content/Domain Analytics, Merchant/App/Business — and crucially **when to prefer DataForSEO Labs** (internal database, ~10× cheaper) over live SERP scraping for keyword/competitor research.
+- **⚙️ Live vs Standard queue vs Labs.** The skill explains the latency/cost trade-off (`.../live` expensive and immediate, `task_post`+`task_get` ~2× cheaper but async, Labs cheap with no scraping).
+- **📋 Ready-made recipes.** Search volume, SERP rank tracking, keyword ideas, competitors / domain intersection, bulk backlinks, on-page audit — as MCP calls **or** as `curl` (reusable in n8n, Make, scripts).
+- **🔌 No rigid coupling.** Unlike a "frozen Python wrappers" skill, it hardcodes no subset of endpoints: it leans on the MCP's `api_request`, so **the whole API stays reachable**.
 
-## Prérequis : le MCP officiel
+## Prerequisite: the official MCP
 
-Ce skill suppose que le [MCP DataForSEO](https://github.com/dataforseo/mcp-server-typescript) est branché sur ton client Claude.
+This skill assumes the [DataForSEO MCP](https://github.com/dataforseo/mcp-server-typescript) is wired into your Claude client.
 
-**Claude Desktop** — dans `claude_desktop_config.json` :
+**Claude Desktop** — in `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -40,52 +42,64 @@ Ce skill suppose que le [MCP DataForSEO](https://github.com/dataforseo/mcp-serve
       "command": "npx",
       "args": ["-y", "dataforseo-mcp-server", "--mode", "stdio"],
       "env": {
-        "DATAFORSEO_LOGIN": "<ton_login_api>",
-        "DATAFORSEO_PASSWORD": "<ton_mot_de_passe_api>"
+        "DATAFORSEO_LOGIN": "<your_api_login>",
+        "DATAFORSEO_PASSWORD": "<your_api_password>"
       }
     }
   }
 }
 ```
 
-**Claude Code** — `claude mcp add dataforseo -- npx -y dataforseo-mcp-server --mode stdio` (puis renseigne les variables d'environnement).
+**Claude Code** — `claude mcp add dataforseo -- npx -y dataforseo-mcp-server --mode stdio` (then set the environment variables).
 
-> `login` = l'email du compte API, `password` = le mot de passe **d'API** fourni sur https://app.dataforseo.com/api-access (valeurs **en clair** : le MCP encode lui-même l'en-tête Basic Auth).
+> `login` = your API account email, `password` = the **API** password from https://app.dataforseo.com/api-access (plain values — the MCP builds the Basic Auth header itself).
 
-Le skill fonctionne aussi **sans le MCP** en fallback `curl` (voir `skill/references/recipes.md`), mais le combo MCP + skill est l'usage recommandé.
+The skill also works **without the MCP** via a `curl` fallback (see `skill/references/recipes.md`), but the MCP + skill combo is the recommended usage.
 
-## Installation du skill
+## Installing the skill
 
-Copie le dossier `skill/` dans le répertoire de skills de ton client, sous le nom `dataforseo/` :
+Copy the `skill/` folder into your client's skills directory, named `dataforseo/`:
 
 ```bash
-# Claude Code / Desktop (niveau utilisateur)
+# Claude Code / Desktop (user level)
 cp -r skill "$HOME/.claude/skills/dataforseo"
 ```
 
-Claude déclenchera le skill dès qu'une tâche touche au SEO / SERP / mots-clés / backlinks / audit on-page, ou dès qu'on veut tester une requête DataForSEO.
+Claude triggers the skill whenever a task touches SEO / SERP / keywords / backlinks / on-page audits, or whenever you want to test a DataForSEO request.
+
+## Compatibility beyond Claude
+
+Three layers, from most Claude-specific to fully portable:
+
+| Layer | Compatibility |
+|---|---|
+| **Skill format** (`SKILL.md` + auto-triggering frontmatter) | **Claude** ecosystem (Claude Code, Claude Desktop, Agent SDK). The auto-trigger mechanism is Claude-specific. |
+| **DataForSEO MCP server** | **Any MCP client** — Cursor, Cline, Windsurf, Zed, VS Code, etc. MCP is an open standard, no longer Claude-only. |
+| **The content** (endpoints, cost/modes, curl recipes) | **Universal.** Plain Markdown + curl calls: reusable as a rules/context file for any agent (e.g. `.cursorrules`), or directly in n8n / Make / scripts. |
+
+In short: the packaging is optimized for Claude, but **the substance is portable**. A Cursor user can wire up the same MCP and paste the playbook content as rules. PRs adapting it to other agents are welcome.
 
 ## Structure
 
 ```
 skill/
-├── SKILL.md                    # playbook principal : décision endpoint + mode, règle coût
+├── SKILL.md                    # main playbook: endpoint + mode decision, cost rule
 └── references/
-    ├── cost-and-modes.md       # Live vs Standard queue vs Labs, sandbox gratuit, arbitrages
-    ├── endpoints.md            # carte complète des endpoints v3 (chemins exacts)
-    └── recipes.md              # recettes prêtes (MCP + curl), dont patterns SEO courants
+    ├── cost-and-modes.md       # Live vs Standard queue vs Labs, free sandbox, trade-offs
+    ├── endpoints.md            # full v3 endpoint map (exact paths)
+    └── recipes.md              # ready-made recipes (MCP + curl), incl. common SEO patterns
 ```
 
-## Le playbook est en français
+## The playbook is written in French
 
-Le contenu du skill est rédigé en français. Il est facilement traduisible — PR bienvenues pour une version anglaise.
+The skill content is currently written in French. It is easily translatable — PRs for an English version are welcome.
 
-## Licence
+## License
 
-MIT — voir [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
 
-## Crédits
+## Credits
 
-- API & MCP : [DataForSEO](https://dataforseo.com/) · [mcp-server-typescript](https://github.com/dataforseo/mcp-server-typescript)
-- Inspiration (approche skill standalone) : [nikhilbhansali/dataforseo-skill-claude](https://github.com/nikhilbhansali/dataforseo-skill-claude)
-- Maintenu par [Creapulse](https://creapulse.fr).
+- API & MCP: [DataForSEO](https://dataforseo.com/) · [mcp-server-typescript](https://github.com/dataforseo/mcp-server-typescript)
+- Inspiration (standalone skill approach): [nikhilbhansali/dataforseo-skill-claude](https://github.com/nikhilbhansali/dataforseo-skill-claude)
+- Maintained by [Creapulse](https://creapulse.fr).
