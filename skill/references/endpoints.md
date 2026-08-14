@@ -8,6 +8,18 @@ Moteurs : `google`, `bing`, `yahoo`, `youtube`, `baidu`… Types : `organic`, `m
 Modes : `.../live/advanced`, `.../live/regular`, `.../task_post` + `.../task_get/advanced/{id}`.
 Ex : `serp/google/organic/live/advanced`, `serp/google/maps/live/advanced`.
 
+## AI Optimization API — `ai_optimization/...` (GEO / AI search)
+Données pour l'optimisation « AI search » (Google AI Overviews, ChatGPT, Gemini, Perplexity, Claude).
+- **AI Keyword Data** : `ai_optimization/ai_keyword_data/keywords_search_volume/live` → volume de recherche estimé des mots-clés *dans les outils IA*. (Base de données → bon marché.)
+- **LLM Mentions** (param `platform`: `google` = AI Overview, `chat_gpt` = ChatGPT) → suivi de mentions marque/domaine dans les réponses IA. (Base de données → bon marché.)
+  - `ai_optimization/llm_mentions/search_mentions/live` → mentions brutes + métriques
+  - `.../target_metrics/live`, `.../multi_target_metrics/live` (+ variantes `_lite`) → métriques agrégées par cible
+  - `.../top_mentioned_domains|pages|brands|brand_categories/live` (+ `_lite`) → tops
+  - `.../historical/live`, `.../timeseries_delta/live`, `.../timeseries_new_lost/live` → évolution mensuelle, deltas, nouveaux/perdus
+- **LLM Responses** (interroge un modèle, réponse structurée) : `ai_optimization/{claude|chat_gpt|gemini|perplexity}/llm_responses/live` (+ `task_post`/`tasks_ready`/`task_get`). ⚠️ exécute réellement le LLM → **plus cher**.
+- **LLM Scraper** (résultats structurés d'une recherche IA) : `ai_optimization/{chat_gpt|gemini}/llm_scraper/live/advanced` (+ `/html`, + task). ⚠️ scraping IA → **plus cher**.
+- Codes location/langue (gratuits) : `ai_optimization/.../locations_and_languages`.
+
 ## Keywords Data API — `keywords_data/...`
 - Google Ads : `keywords_data/google_ads/search_volume/live`, `.../keywords_for_keywords/live`, `.../keywords_for_site/live`, `.../ad_traffic_by_keywords/live`.
 - Google Trends : `keywords_data/google_trends/explore/live`.

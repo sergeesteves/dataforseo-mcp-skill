@@ -1,6 +1,6 @@
 ---
 name: dataforseo
-description: Playbook pour utiliser l'API DataForSEO (SERP, Keywords Data, Labs, Backlinks, On-Page, Content/Domain Analytics, Merchant/App/Business) via le serveur MCP `dataforseo`. Sert à choisir le bon endpoint + le bon mode (live vs task vs Labs) ET à maîtriser le coût (API prépayée, facturée à l'appel). À utiliser dès qu'on veut du volume de recherche, du SERP, des backlinks, un audit on-page, de la recherche de mots-clés/concurrents, ou tester une requête DataForSEO en local.
+description: Playbook pour utiliser l'API DataForSEO (SERP, AI Optimization/GEO, Keywords Data, Labs, Backlinks, On-Page, Content/Domain Analytics, Merchant/App/Business) via le serveur MCP `dataforseo`. Sert à choisir le bon endpoint + le bon mode (live vs task vs Labs) ET à maîtriser le coût (API prépayée, facturée à l'appel). À utiliser dès qu'on veut du volume de recherche, du SERP, des mentions de marque dans les réponses IA (AI Overviews/ChatGPT), des backlinks, un audit on-page, de la recherche de mots-clés/concurrents, ou tester une requête DataForSEO en local.
 ---
 
 # DataForSEO — playbook
@@ -38,6 +38,7 @@ Réflexe : pour de la **recherche de mots-clés ou d'analyse concurrentielle**, 
 ## Quel endpoint pour quel job (carte rapide)
 
 - **SERP API** → positions/SERP réels (Google organic, maps, news, images, YouTube…). Scraping de résultats.
+- **AI Optimization API** (GEO / AI search) → volume de mots-clés *dans les outils IA*, **mentions de marque dans les réponses IA** (AI Overviews, ChatGPT…), interrogation de LLM (Claude/ChatGPT/Gemini/Perplexity) et scraping de résultats IA. ⚠️ LLM Responses/Scraper **exécutent réellement le modèle → plus cher** que LLM Mentions / AI Keyword Data (base de données).
 - **Keywords Data API** → search volume, CPC, competition, Google Trends, keywords-for-site/keywords-for-keywords.
 - **DataForSEO Labs API** → keyword ideas, related/suggestions, ranked keywords d'un domaine, competitors, domain/page intersection, keyword difficulty, search intent, historical.
 - **Backlinks API** → summary, backlinks, referring domains, anchors, bulk metrics, competitors, intersection.

@@ -59,6 +59,20 @@ POST dataforseo_labs/google/domain_intersection/live
 [ { "target1": "mondomaine.com", "target2": "concurrent.com", "location_name": "France", "language_code": "fr" } ]
 ```
 
+## GEO — volume de recherche « AI search » d'un mot-clé
+```
+POST ai_optimization/ai_keyword_data/keywords_search_volume/live
+[ { "keywords": ["crm ia","meilleur crm"], "location_name": "France", "language_code": "fr" } ]
+```
+
+## GEO — mentions de ta marque/domaine dans les réponses IA
+```
+POST ai_optimization/llm_mentions/target_metrics/live
+[ { "target": "creapulse.fr", "platform": "google", "location_name": "France", "language_code": "fr" } ]
+```
+`platform` : `google` (AI Overview) ou `chat_gpt` (ChatGPT). Voir aussi `top_mentioned_domains`,
+`historical`, `timeseries_new_lost` pour le suivi dans le temps. (Endpoints base de données → bon marché.)
+
 ## Backlinks (résumé + bulk)
 ```
 POST backlinks/summary/live
