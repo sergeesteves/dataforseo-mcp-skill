@@ -16,7 +16,7 @@ En **sandbox** (gratuit) : remplacer le host par `sandbox.dataforseo.com`.
 curl -s -X POST "https://api.dataforseo.com/v3/appendix/user_data" \
   -u "$DATAFORSEO_LOGIN:$DATAFORSEO_PASSWORD"
 ```
-→ lire `tasks[0].result[0].money.balance`.
+→ en brut, lire `tasks[0].result[0].money.balance`. ⚠️ **Via le MCP `api_request`, le solde ne remonte pas** (renvoie `items: []`) → pour le chiffre, utilise ce **curl**.
 
 ## Volume de recherche + CPC (repris du workflow n8n “VS Search Volume”)
 ```
@@ -36,6 +36,12 @@ POST serp/google/organic/task_post        # poster N tâches
 POST serp/google/organic/tasks_ready       # voir les tâches prêtes
 GET  serp/google/organic/task_get/advanced/{id}
 ```
+
+**Cheat-sheet des items SERP (advanced)** — évite un aller-retour sandbox. Chaque item a un champ `type` ; les items vivent dans `items[]` (MCP) ou `tasks[0].result[0].items[]` (brut) :
+- `type: "organic"` → `title`, `domain`, `url`, `rank_absolute` (+ `rank_group`, `description`)
+- `type: "people_also_ask"` → `items[].title` = la question (PAA)
+- `type: "related_searches"` → `items[]` = **tableau de chaînes** (les recherches associées)
+- autres `type` fréquents : `paid`, `featured_snippet`, `ai_overview`, `map`, `video`, `knowledge_graph`
 
 ## Idées de mots-clés / recherche kw (préférer Labs, bon marché)
 ```

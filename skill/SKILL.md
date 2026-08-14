@@ -13,11 +13,22 @@ Ces 4 outils couvrent **toute** l'API (pas seulement les endpoints déjà câbl�
 
 Fallback sans MCP : `curl` en Basic Auth (voir `references/recipes.md`).
 
+## ⚠️ Forme de la réponse : MCP `api_request` vs API brute (curl / HTTP)
+
+Piège majeur : **le MCP `api_request` déballe la réponse**, pas l'API brute.
+
+- **Via le MCP** : tu reçois directement le niveau tâche → `{ id, status_code, status_message, items }` (en gros `tasks[0].result[0]`, avec `items`).
+- **En curl / HTTP brut** (scripts, n8n, Make…) : la réponse est **enveloppée** → `tasks[0].result[0].items[...]`.
+- **Conséquence vécue** : les champs du `result` qui ne vivent **pas** dans `items` (ex. `appendix/user_data` → `result[0].money.balance`) **peuvent ne pas remonter via le MCP** (renvoie `items: []`). Pour ces cas (dont **le solde**), lis la réponse **brute via curl**, ou repère la vraie structure.
+- **Donc** : si tu valides une requête via le MCP puis la câbles en HTTP brut, **adapte les chemins de parsing** — passe de `items[...]` (MCP) à `tasks[0].result[0].items[...]` (brut).
+
+Pour tester en **sandbox via le MCP** : `api_request` avec le paramètre **`url`** (pas `path`) → `url: "https://sandbox.dataforseo.com/v3/..."`.
+
 ## ⚠️ Règle n°1 : le coût (prioritaire)
 
 DataForSEO est une **API prépayée, facturée à chaque appel**. Le solde peut se vider vite sur du batch.
 
-- **Toujours vérifier le solde avant une session de travail** : `GET /v3/appendix/user_data` (gratuit).
+- **Toujours vérifier le solde avant une session de travail** : `POST /v3/appendix/user_data` (gratuit). ⚠️ via le MCP, le `money.balance` peut ne pas remonter (voir encart ci-dessus) — pour le **chiffre exact du solde**, passe par **curl** (`references/recipes.md`).
 - **Prévenir + estimer l'utilisateur AVANT tout appel “gros”** : batch > ~50 tâches, crawl on-page d'un site entier, extraction backlinks massive, ou tout ce qui peut dépasser ~1 $ estimé. (Même logique que la règle Firecrawl.)
 - **Tester d'abord la STRUCTURE en Sandbox** (gratuit, données bidons) avant de lancer en prod : base `https://sandbox.dataforseo.com/v3/`. Valide le corps de requête sans dépenser, puis bascule sur `https://api.dataforseo.com/v3/`.
 - Chaque réponse renvoie un champ **`cost`** (total) + un `cost` par tâche → **le logguer/annoncer** après un appel réel.
