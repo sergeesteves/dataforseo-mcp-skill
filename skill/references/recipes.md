@@ -89,7 +89,17 @@ Dans `items[].ai_overview` :
 - `items[]` = éléments typés (`ai_overview_element`, `ai_overview_table_element`…) → structure/contenu attendu d'une page.
 - `references[]` = **les sources que Google a citées** (`source`, `domain`, `url`, `title`, `text`) → *où être cité pour apparaître dans la réponse IA* (= tes concurrents GEO).
 - `refinement_chips` = facettes de raffinement (`items[].title` + `url`, avec `options[]`) → **intentions de recherche dérivées** ; souvent `null` (pas toujours présent).
-⚠️ Le `cost` (~0,004 $/appel) **ne remonte pas via le MCP** → vérifier via curl / delta de solde. Pas de fan-out littéral.
+⚠️ Le `cost` (~0,004 $/appel) **ne remonte pas via le MCP** → vérifier via curl / delta de solde. Ce endpoint SERP ne donne PAS les fan-out queries → voir la recette Gemini ci-dessous.
+
+## GEO — query fan-out (via Gemini LLM Responses) ⭐
+```
+POST ai_optimization/gemini/llm_responses/live
+[ { "user_prompt": "best project management software for small teams",
+    "model_name": "gemini-2.5-flash", "web_search": true, "max_output_tokens": 1024 } ]
+```
+Avec **`web_search: true`**, Gemini (modèle de Google) émet des requêtes vers Google Search pour ancrer sa réponse → elles remontent dans **`result[0].fan_out_queries`** = le plus proche du vrai query fan-out de Google. `items[].sections[].annotations` = sources citées.
+Testé (2026-08) sur ce prompt → 3 fan-out : *« …small teams 2024 »*, *« top rated …small businesses »*, *« affordable …small team »*. **Coût ~0,037 $** (web_search + tokens).
+⚠️ `fan_out_queries` est au niveau `result[0]` (sibling de `items`) → le MCP peut le masquer, **lire en curl**. Champ aussi présent sur **Perplexity** (`sonar`). Souvent `null` sans `web_search` ou sur un prompt non-recherche. Modèle via `model_name` (listes gratuites `.../llm_responses/models`).
 
 ## Backlinks (résumé + bulk)
 ```

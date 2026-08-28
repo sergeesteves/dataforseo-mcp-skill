@@ -50,7 +50,7 @@ Réflexe : pour de la **recherche de mots-clés ou d'analyse concurrentielle**, 
 ## Quel endpoint pour quel job (carte rapide)
 
 - **SERP API** → positions/SERP réels (Google organic, maps, news, images, YouTube…). Scraping de résultats.
-- **AI Optimization API** (GEO / AI search) → volume de mots-clés *dans les outils IA*, **mentions de marque dans les réponses IA** (AI Overviews, ChatGPT…), interrogation de LLM (Claude/ChatGPT/Gemini/Perplexity) et scraping de résultats IA. ⚠️ LLM Responses/Scraper **exécutent réellement le modèle → plus cher** que LLM Mentions / AI Keyword Data (base de données).
+- **AI Optimization API** (GEO / AI search) → volume de mots-clés *dans les outils IA*, **mentions de marque dans les réponses IA** (AI Overviews, ChatGPT…), interrogation de LLM au **modèle choisi** (Claude/ChatGPT/Gemini/Perplexity) et scraping de résultats IA. Les **LLM Responses** exposent un champ **`fan_out_queries`** (Gemini/Perplexity + `web_search: true`) = le plus proche du **query fan-out** de Google. ⚠️ LLM Responses/Scraper **exécutent réellement le modèle → plus cher** que LLM Mentions / AI Keyword Data (base de données).
 - **Keywords Data API** → search volume, CPC, competition, Google Trends, keywords-for-site/keywords-for-keywords.
 - **DataForSEO Labs API** → keyword ideas, related/suggestions, ranked keywords d'un domaine, competitors, domain/page intersection, keyword difficulty, search intent, historical.
 - **Backlinks API** → summary, backlinks, referring domains, anchors, bulk metrics, competitors, intersection.

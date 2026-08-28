@@ -17,7 +17,7 @@ Données pour l'optimisation « AI search » (Google AI Overviews, ChatGPT, Gemi
   - `.../target_metrics/live`, `.../multi_target_metrics/live` (+ variantes `_lite`) → métriques agrégées par cible
   - `.../top_mentioned_domains|pages|brands|brand_categories/live` (+ `_lite`) → tops
   - `.../historical/live`, `.../timeseries_delta/live`, `.../timeseries_new_lost/live` → évolution mensuelle, deltas, nouveaux/perdus
-- **LLM Responses** (interroge un modèle, réponse structurée) : `ai_optimization/{claude|chat_gpt|gemini|perplexity}/llm_responses/live` (+ `task_post`/`tasks_ready`/`task_get`). ⚠️ exécute réellement le LLM → **plus cher**.
+- **LLM Responses** (interroge un modèle, réponse structurée) : `ai_optimization/{claude|chat_gpt|gemini|perplexity}/llm_responses/live` (+ `task_post`/`tasks_ready`/`task_get`). Choix du **modèle** via `model_name` (listes **gratuites** `.../llm_responses/models`). ⚠️ exécute réellement le LLM → **plus cher**. Avec **`web_search: true`**, Gemini/Perplexity renvoient **`fan_out_queries`** (sous-requêtes émises vers Google Search) = le plus proche du **query fan-out** de Google.
 - **LLM Scraper** (résultats structurés d'une recherche IA) : `ai_optimization/{chat_gpt|gemini}/llm_scraper/live/advanced` (+ `/html`, + task). ⚠️ scraping IA → **plus cher**.
 - Codes location/langue (gratuits) : `ai_optimization/.../locations_and_languages`.
 
