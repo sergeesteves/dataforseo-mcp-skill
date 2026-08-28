@@ -7,6 +7,7 @@ Toujours : POST, Basic Auth, body = `[ {…} ]`. En cas de doute sur le chemin e
 Moteurs : `google`, `bing`, `yahoo`, `youtube`, `baidu`… Types : `organic`, `maps`, `news`, `images`, `local_finder`, `autocomplete`, `ads`.
 Modes : `.../live/advanced`, `.../live/regular`, `.../task_post` + `.../task_get/advanced/{id}`.
 Ex : `serp/google/organic/live/advanced`, `serp/google/maps/live/advanced`.
+- **Google AI Mode / AI Overview** : `serp/google/ai_mode/live/advanced` (+ task) → la **réponse IA** (markdown), ses **`references`** (= sources citées par Google), `links`, tableaux, questions de suivi, + `refinement_chips` (facettes de raffinement, souvent `null`). Clé pour le **GEO**. ~0,004 $/appel. ⚠️ pas de fan-out littéral (Google ne l'expose pas).
 
 ## AI Optimization API — `ai_optimization/...` (GEO / AI search)
 Données pour l'optimisation « AI search » (Google AI Overviews, ChatGPT, Gemini, Perplexity, Claude).

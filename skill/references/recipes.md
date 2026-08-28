@@ -79,6 +79,18 @@ POST ai_optimization/llm_mentions/target_metrics/live
 `platform` : `google` (AI Overview) ou `chat_gpt` (ChatGPT). Voir aussi `top_mentioned_domains`,
 `historical`, `timeseries_new_lost` pour le suivi dans le temps. (Endpoints base de données → bon marché.)
 
+## GEO — Google AI Mode / AI Overview (réponse IA + sources citées)
+```
+POST serp/google/ai_mode/live/advanced
+[ { "keyword": "best project management software", "location_name": "United States", "language_code": "en" } ]
+```
+Dans `items[].ai_overview` :
+- `markdown` = la **réponse IA** complète (intro, tableaux comparatifs, questions de suivi).
+- `items[]` = éléments typés (`ai_overview_element`, `ai_overview_table_element`…) → structure/contenu attendu d'une page.
+- `references[]` = **les sources que Google a citées** (`source`, `domain`, `url`, `title`, `text`) → *où être cité pour apparaître dans la réponse IA* (= tes concurrents GEO).
+- `refinement_chips` = facettes de raffinement (`items[].title` + `url`, avec `options[]`) → **intentions de recherche dérivées** ; souvent `null` (pas toujours présent).
+⚠️ Le `cost` (~0,004 $/appel) **ne remonte pas via le MCP** → vérifier via curl / delta de solde. Pas de fan-out littéral.
+
 ## Backlinks (résumé + bulk)
 ```
 POST backlinks/summary/live

@@ -20,6 +20,7 @@ Piège majeur : **le MCP `api_request` déballe la réponse**, pas l'API brute.
 - **Via le MCP** : tu reçois directement le niveau tâche → `{ id, status_code, status_message, items }` (en gros `tasks[0].result[0]`, avec `items`).
 - **En curl / HTTP brut** (scripts, n8n, Make…) : la réponse est **enveloppée** → `tasks[0].result[0].items[...]`.
 - **Conséquence vécue** : les champs du `result` qui ne vivent **pas** dans `items` (ex. `appendix/user_data` → `result[0].money.balance`) **peuvent ne pas remonter via le MCP** (renvoie `items: []`). Pour ces cas (dont **le solde**), lis la réponse **brute via curl**, ou repère la vraie structure.
+- **Le champ `cost` disparaît aussi** : le MCP ne renvoie pas le `cost` de l'appel (masqué par le déballage). Pour connaître le coût réel → **curl** (champ `cost` en racine) ou **delta de solde** (`user_data` avant/après, en curl).
 - **Donc** : si tu valides une requête via le MCP puis la câbles en HTTP brut, **adapte les chemins de parsing** — passe de `items[...]` (MCP) à `tasks[0].result[0].items[...]` (brut).
 
 Pour tester en **sandbox via le MCP** : `api_request` avec le paramètre **`url`** (pas `path`) → `url: "https://sandbox.dataforseo.com/v3/..."`.
