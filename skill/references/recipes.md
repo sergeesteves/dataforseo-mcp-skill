@@ -100,6 +100,7 @@ POST ai_optimization/gemini/llm_responses/live
 Avec **`web_search: true`**, Gemini (modèle de Google) émet des requêtes vers Google Search pour ancrer sa réponse → elles remontent dans **`result[0].fan_out_queries`** = le plus proche du vrai query fan-out de Google. `items[].sections[].annotations` = sources citées.
 Testé (2026-08) sur ce prompt → 3 fan-out : *« …small teams 2024 »*, *« top rated …small businesses »*, *« affordable …small team »*. **Coût ~0,037 $** (web_search + tokens).
 ⚠️ `fan_out_queries` est au niveau `result[0]` (sibling de `items`) → le MCP peut le masquer, **lire en curl**. Champ aussi présent sur **Perplexity** (`sonar`). Souvent `null` sans `web_search` ou sur un prompt non-recherche. Modèle via `model_name` (listes gratuites `.../llm_responses/models`).
+⚠️ **≠ le fan-out interne de l'AI Overview/AI Mode.** C'est le fan-out du **modèle Gemini via API** (ses requêtes de grounding), pas le système Search dédié de Google (qui n'est jamais exposé et fait un fan-out bien plus large). C'est un **proxy** des sous-intentions, pas une capture. Preuve observée : sur un même mot-clé, les sources citées par le SERP `ai_mode` et par Gemini se recoupaient à peine. Pour la vérité terrain « ce que voit l'utilisateur / qui est cité » → SERP `ai_mode`.
 
 ## Backlinks (résumé + bulk)
 ```
