@@ -94,12 +94,15 @@ Dans `items[].ai_overview` :
 ## GEO — query fan-out (via Gemini LLM Responses) ⭐
 ```
 POST ai_optimization/gemini/llm_responses/live
-[ { "user_prompt": "best project management software for small teams",
-    "model_name": "gemini-2.5-flash", "web_search": true, "max_output_tokens": 1024 } ]
+[ { "user_prompt": "<sujet>", "model_name": "gemini-3.5-flash", "web_search": true, "max_output_tokens": 1024 } ]
+# aussi disponible sur ChatGPT (fan-out souvent plus riche avec gpt-5) et Perplexity (sonar) :
+POST ai_optimization/chat_gpt/llm_responses/live
+[ { "user_prompt": "<sujet>", "model_name": "gpt-5", "web_search": true, "max_output_tokens": 1024 } ]
 ```
-Avec **`web_search: true`**, Gemini (modèle de Google) émet des requêtes vers Google Search pour ancrer sa réponse → elles remontent dans **`result[0].fan_out_queries`** = le plus proche du vrai query fan-out de Google. `items[].sections[].annotations` = sources citées.
-Testé (2026-08) sur ce prompt → 3 fan-out : *« …small teams 2024 »*, *« top rated …small businesses »*, *« affordable …small team »*. **Coût ~0,037 $** (web_search + tokens).
-⚠️ `fan_out_queries` est au niveau `result[0]` (sibling de `items`) → le MCP peut le masquer, **lire en curl**. Champ aussi présent sur **Perplexity** (`sonar`). Souvent `null` sans `web_search` ou sur un prompt non-recherche. Modèle via `model_name` (listes gratuites `.../llm_responses/models`).
+Avec **`web_search: true`**, le modèle émet des requêtes de grounding → elles remontent dans **`result[0].fan_out_queries`** + `items[].sections[].annotations` = sources citées. Champ présent sur **Gemini, ChatGPT, Perplexity**. **Coût ~0,03-0,06 $/appel**.
+⚠️ **Utiliser des modèles RÉCENTS** (`gemini-3.5-flash`/`3.6`, `gpt-5`) : les petits (`gpt-4.1-mini`) fan-out mal (1 requête verbatim). Empirique (2026-08, 4 prompts) : GPT-5 ≥ Gemini pour la richesse. Reco : lancer **Gemini + GPT-5** et merger.
+⚠️ **Souvent `null` ou verbatim** — surtout sur requêtes définitionnelles (« what is X ») → **prévoir un fallback** (refinements/questions de suivi AIO). Params ChatGPT non-reasoning : `force_web_search`, `web_search_country_iso_code`.
+⚠️ `fan_out_queries` est au niveau `result[0]` (sibling de `items`) → le MCP peut le masquer, **lire en curl**. Modèle via `model_name` (listes gratuites `.../llm_responses/models`).
 ⚠️ **≠ le fan-out interne de l'AI Overview/AI Mode.** C'est le fan-out du **modèle Gemini via API** (ses requêtes de grounding), pas le système Search dédié de Google (qui n'est jamais exposé et fait un fan-out bien plus large). C'est un **proxy** des sous-intentions, pas une capture. Preuve observée : sur un même mot-clé, les sources citées par le SERP `ai_mode` et par Gemini se recoupaient à peine. Pour la vérité terrain « ce que voit l'utilisateur / qui est cité » → SERP `ai_mode`.
 
 ## Backlinks (résumé + bulk)
