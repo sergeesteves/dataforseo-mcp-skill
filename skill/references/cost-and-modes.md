@@ -4,15 +4,27 @@ DataForSEO = **crédit prépayé**, débité à chaque appel réussi. Objectif :
 
 ## Vérifier le solde (gratuit)
 ```
-POST https://api.dataforseo.com/v3/appendix/user_data
+GET https://api.dataforseo.com/v3/appendix/user_data
 ```
 Renvoie `money.balance`, limites de rate, etc. Aucun coût. À faire en début de session et après un gros batch.
-⚠️ **Via le MCP `api_request`, le `money.balance` peut ne pas remonter** (la réponse est déballée au niveau `items`, qui est vide pour cet endpoint). Pour le **chiffre exact**, utilise **curl** (voir `recipes.md`). En brut, le chemin est `tasks[0].result[0].money.balance`.
+
+**Via le MCP `api_request`, il faut `noAiMode: true`** — sinon la réponse est déballée au niveau `items`, qui est vide pour cet endpoint, et le solde est inatteignable. Avec le paramètre, le chemin est celui de l'API brute : `tasks[0].result[0].money.balance`.
+
+```
+api_request({ method: "GET", path: "/v3/appendix/user_data", noAiMode: true })
+```
+
+Deux pièges constatés le 2026-11-07 :
+- **en `POST` sans corps**, l'API répond `40502 POST Data Is Empty` → utiliser `GET` ;
+- la réponse complète pèse **~443 Ko** (le bloc `price` contient la grille tarifaire entière) → l'écrire dans un fichier et n'y lire que `money.balance`, jamais la charger dans le contexte.
 
 ## Le champ `cost`
 Chaque réponse contient :
 - `cost` au niveau racine = coût total de l'appel,
 - `tasks[].cost` = coût par tâche.
+
+⚠️ **Ces deux champs vivent dans l'enveloppe**, que le mode IA du MCP retire : par défaut `api_request` ne les renvoie pas. Pour connaître le coût réel d'un appel par le MCP, le rejouer avec **`noAiMode: true`** (ou le passer en curl). Le delta de solde avant/après reste la mesure de repli.
+
 → Après un appel réel, **annoncer le coût** à l'utilisateur (surtout en batch).
 
 ## Ordres de grandeur de prix (indicatifs)
@@ -27,6 +39,21 @@ Pour rendre la règle « prévenir avant ~1 $ » actionnable. **Toujours confirm
 | `appendix/user_data`, `.../locations`, `.../languages`, `docs_*` | **gratuit** |
 
 Repère rapide : 1 $ ≈ ~500 SERP live advanced, ou ~300 mots-clés Labs. Un batch de milliers de lignes dépasse vite le seuil → **prévenir + estimer avant**.
+
+## Annoncer le coût avant, pas seulement après
+
+Avant tout lot payant, afficher le **compte d'appels estimé poste par poste** et attendre un accord :
+
+```
+ESTIMATION
+  Validation de locale :            1
+  Expansion (ideas + suggestions) : 3
+  Enrichissement (lots ≤ 1000) :    ~2
+  ----------------------------------
+  Total : ~6 appels
+```
+
+Deux conséquences de forme : l'enrichissement se fait **en lots** (un appel pour 1000 mots-clés, pas 1000 appels), et on ne **re-demande jamais** une donnée déjà obtenue — un volume arrivé avec l'expansion ne se rachète pas à l'étape suivante.
 
 ## Les modes d'exécution
 
@@ -49,6 +76,7 @@ N'interroge **pas** le SERP live : lit la **base de données interne DFS** (mise
 - ✅ Parfait pour recherche de mots-clés, keyword difficulty, concurrents, ranked keywords, intersection.
 - ❌ Données “base” (pas le SERP à la seconde près).
 - Réflexe : **avant** de lancer du SERP live pour de la recherche kw/concurrents, regarde si Labs répond au besoin.
+- ⚠️ Mais pour répondre à « est-ce que cette page classe aujourd'hui ? », Labs ne suffit pas : la base peut être en retard. Un **statut de classement** se lit sur le SERP live, jamais sur la base.
 
 ### 4. Keywords Data (`keywords_data/...`)
 Source Google Ads (search volume, CPC, competition), Google Trends, clickstream.
@@ -67,3 +95,4 @@ Base `https://sandbox.dataforseo.com/v3/` : mêmes endpoints, **données factice
 - **Positions réelles d'aujourd'hui sur une requête** → SERP Live (ponctuel) ou Standard queue (en masse).
 - **Audit d'un site** → On-Page `task_post` (crawl) ; pour 1 seule page → `instant_pages` (live).
 - **Backlinks en masse** → endpoints `bulk_*` (1 appel pour N domaines) plutôt que N appels unitaires.
+- **Rejouer un rapport** → relire le JSON de données déjà sur disque, **zéro appel**.
